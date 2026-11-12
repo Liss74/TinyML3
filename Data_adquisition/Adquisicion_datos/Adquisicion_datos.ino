@@ -11,7 +11,7 @@ constexpr uint32_t N_BYTES       = (uint32_t)N_MUESTRAS * N_CANALES * 2;  // 360
 constexpr uint8_t  PAYLOAD       = 18;                      // bytes de datos por paquete
 constexpr uint16_t N_PAQUETES    = N_BYTES / PAYLOAD;       // 2000
 constexpr uint32_t CUENTA_ATRAS_MS = 3000;                  // tiempo para colocarse
-constexpr uint8_t  PAUSA_PAQUETE_MS = 10;                    // ajustar según pérdidas
+constexpr uint8_t  PAUSA_PAQUETE_MS = 25;                    // ajustar según pérdidas
 
 // Escalado a int16: aceleración en mg (±4 g -> ±4000), giro en 0.1 °/s (±2000 °/s -> ±20000)
 constexpr float ESC_ACEL = 1000.0f;
@@ -112,21 +112,69 @@ void tomaDatos() {
 }
 
 // ---------- Envío por BLE ----------
+
 void enviar(uint16_t desde) {
+  if (!BLE.connected() || !datosChar.subscribed()) {
+    Serial.println("BLE no conectado o sin suscripcion");
+    return;
+  }
+
   setEstado(ENVIANDO);
+
   const uint8_t* bytes = (const uint8_t*)buffer;
   uint8_t paquete[2 + PAYLOAD];
 
-  for (uint16_t s = desde; s < N_PAQUETES && BLE.connected(); s++) {
-    paquete[0] = s & 0xFF;               // número de secuencia (little-endian)
-    paquete[1] = s >> 8;
-    memcpy(paquete + 2, bytes + (uint32_t)s * PAYLOAD, PAYLOAD);
-    datosChar.writeValue(paquete, sizeof(paquete));
+  uint32_t inicio = millis();
+  uint16_t fallos = 0;
+  uint16_t enviados = 0;
+
+  for (uint16_t s = desde;
+       s < N_PAQUETES && BLE.connected();
+       s++) {
+
+    paquete[0] = s & 0xFF;
+    paquete[1] = (s >> 8) & 0xFF;
+
+    memcpy(
+      paquete + 2,
+      bytes + (uint32_t)s * PAYLOAD,
+      PAYLOAD
+    );
+
+    int resultado = datosChar.writeValue(
+      paquete, sizeof(paquete)
+    );
+
+    if (resultado != sizeof(paquete)) {
+      fallos++;
+    }
+
+    enviados++;
+
     BLE.poll();
     delay(PAUSA_PAQUETE_MS);
+
+    // Diagnóstico por USB cada 100 paquetes
+    if (enviados % 100 == 0 && Serial) {
+      Serial.print("Paquetes procesados: ");
+      Serial.print(enviados);
+      Serial.print(" | Tiempo ms: ");
+      Serial.println(millis() - inicio);
+    }
   }
+
+  if (Serial) {
+    Serial.print("Envio finalizado. Paquetes: ");
+    Serial.print(enviados);
+    Serial.print(" | Fallos locales: ");
+    Serial.print(fallos);
+    Serial.print(" | Duracion ms: ");
+    Serial.println(millis() - inicio);
+  }
+
   setEstado(LISTO);
 }
+
 
 void procesarComando() {
   uint8_t cmd[3] = {0, 0, 0};

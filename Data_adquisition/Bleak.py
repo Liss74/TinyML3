@@ -73,6 +73,12 @@ async def esperar_estado(rx: Receptor, objetivo: int, timeout: float):
         await asyncio.sleep(0.05)
 
 
+async def estado_en_placa(client: BleakClient) -> int:
+    valor = await client.read_gatt_char(UUID_ESTADO)
+    return int(valor[0])
+
+
+
 async def grabar(client: BleakClient, rx: Receptor):
     rx.paquetes.clear()
     rx.estado = None
@@ -86,24 +92,130 @@ async def grabar(client: BleakClient, rx: Receptor):
     print("  Grabación terminada. Descargando datos...")
 
 
+
 async def descargar(client: BleakClient, rx: Receptor) -> bytes:
+    loop = asyncio.get_running_loop()
     desde = 0
+
     for intento in range(1, MAX_REINTENTOS + 1):
+        actual = await estado_en_placa(client)
+
+        if actual != LISTO:
+            raise RuntimeError(
+                f"La placa no está lista para enviar: estado {actual}"
+            )
+
         rx.estado = None
+
         await client.write_gatt_char(
-            UUID_CONTROL, struct.pack("<BH", CMD_SEND, desde), response=True
+            UUID_CONTROL,
+            struct.pack("<BH", CMD_SEND, desde),
+            response=True
         )
-        await esperar_estado(rx, ENVIANDO, 5)
-        await esperar_estado(rx, LISTO, 120)
-        await asyncio.sleep(0.3)  # deja llegar los últimos paquetes
 
-        faltan = [s for s in range(N_PAQUETES) if s not in rx.paquetes]
-        print(f"  Intento {intento}: {N_PAQUETES - len(faltan)}/{N_PAQUETES} paquetes")
+        inicio = loop.time()
+        ultimo_reporte = inicio
+        ultimo_avance = inicio
+        ultima_comprobacion = inicio
+        cantidad_anterior = len(rx.paquetes)
+
+        while True:
+            ahora = loop.time()
+            recibidos = len(rx.paquetes)
+
+            if recibidos > cantidad_anterior:
+                cantidad_anterior = recibidos
+                ultimo_avance = ahora
+
+            # No necesitamos esperar una notificación final
+            # si ya recibimos todos los datos.
+            if recibidos == N_PAQUETES:
+                break
+
+            if rx.estado == LISTO:
+                break
+
+            if not client.is_connected:
+                raise RuntimeError("Se perdió la conexión BLE")
+
+            # Mostrar progreso cada 5 segundos
+            if ahora - ultimo_reporte >= 5:
+                porcentaje = 100 * recibidos / N_PAQUETES
+                print(
+                    f"  Recibidos: {recibidos}/{N_PAQUETES}"
+                    f" ({porcentaje:.1f}%)"
+                    f" | Estado: {rx.estado}"
+                    f" | Tiempo: {ahora - inicio:.1f}s"
+                )
+                ultimo_reporte = ahora
+
+            # Si no llegan paquetes, consultar el estado real.
+            if (ahora - ultimo_avance >= 15
+                    and ahora - ultima_comprobacion >= 5):
+
+                actual = await estado_en_placa(client)
+                ultima_comprobacion = loop.time()
+
+                if actual == LISTO:
+                    rx.estado = LISTO
+                    break
+
+            if ahora - inicio > 180:
+                raise TimeoutError(
+                    f"Transferencia excedió 180 s. "
+                    f"Recibidos {recibidos}/{N_PAQUETES}, "
+                    f"último estado notificado: {rx.estado}"
+                )
+
+            await asyncio.sleep(0.1)
+
+        # Permitir que se procesen notificaciones pendientes
+        await asyncio.sleep(0.5)
+
+        faltan = [
+            s for s in range(N_PAQUETES)
+            if s not in rx.paquetes
+        ]
+
+        print(
+            f"  Intento {intento}: "
+            f"{N_PAQUETES - len(faltan)}/{N_PAQUETES} paquetes"
+        )
+
         if not faltan:
-            return b"".join(rx.paquetes[s] for s in range(N_PAQUETES))
-        desde = faltan[0]
+            actual = await estado_en_placa(client)
 
-    raise RuntimeError("No se pudieron recibir todos los paquetes; sube PAUSA_PAQUETE_MS en el sketch")
+            if actual != LISTO:
+                print(
+                    f"  Aviso: datos completos, "
+                    f"pero la placa sigue en estado {actual}"
+                )
+
+            return b"".join(
+                rx.paquetes[s] for s in range(N_PAQUETES)
+            )
+
+        # Antes de retransmitir, comprobar que la
+        # placa haya terminado el envío anterior.
+        actual = await estado_en_placa(client)
+
+        if actual != LISTO:
+            raise RuntimeError(
+                f"Descarga incompleta: {len(faltan)} paquetes "
+                f"faltantes. La placa sigue en estado {actual}"
+            )
+
+        desde = faltan[0]
+        print(
+            f"  Faltan {len(faltan)} paquetes. "
+            f"Reintentando desde el paquete {desde}..."
+        )
+
+    raise RuntimeError(
+        f"Transferencia incompleta después de "
+        f"{MAX_REINTENTOS} intentos"
+    )
+
 
 
 def guardar(raw: bytes, ruta: Path):
