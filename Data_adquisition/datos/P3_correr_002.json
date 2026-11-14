@@ -1,0 +1,20 @@
+{
+  "captura_utc": "2026-11-13T23:17:34.642108+00:00",
+  "persona": "P3",
+  "actividad": "correr",
+  "fs_hz": 100,
+  "numero_muestras": 3000,
+  "crc32": "FA29360D",
+  "calidad_revisar": false,
+  "max_huecos_permitidos": 30,
+  "adquisicion": {
+    "version": 3,
+    "id_toma": 1,
+    "muestras": 3000,
+    "huecos": 0,
+    "acel_reutilizada": 205,
+    "giro_reutilizado": 198,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4970
+  }
+}

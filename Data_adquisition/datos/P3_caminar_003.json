@@ -1,0 +1,20 @@
+{
+  "captura_utc": "2026-11-13T23:10:10.574845+00:00",
+  "persona": "P3",
+  "actividad": "caminar",
+  "fs_hz": 100,
+  "numero_muestras": 3000,
+  "crc32": "1F84D446",
+  "calidad_revisar": false,
+  "max_huecos_permitidos": 30,
+  "adquisicion": {
+    "version": 3,
+    "id_toma": 1,
+    "muestras": 3000,
+    "huecos": 0,
+    "acel_reutilizada": 204,
+    "giro_reutilizado": 268,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4990
+  }
+}

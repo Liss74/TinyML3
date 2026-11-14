@@ -1,0 +1,20 @@
+{
+  "captura_utc": "2026-11-13T23:01:41.525680+00:00",
+  "persona": "P3",
+  "actividad": "bajar_escaleras",
+  "fs_hz": 100,
+  "numero_muestras": 3000,
+  "crc32": "F077843C",
+  "calidad_revisar": false,
+  "max_huecos_permitidos": 30,
+  "adquisicion": {
+    "version": 3,
+    "id_toma": 1,
+    "muestras": 3000,
+    "huecos": 0,
+    "acel_reutilizada": 165,
+    "giro_reutilizado": 225,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4961
+  }
+}

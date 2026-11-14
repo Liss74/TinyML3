@@ -1,0 +1,20 @@
+{
+  "captura_utc": "2026-11-13T23:53:06.090081+00:00",
+  "persona": "P2",
+  "actividad": "caminar",
+  "fs_hz": 100,
+  "numero_muestras": 3000,
+  "crc32": "8A385FE2",
+  "calidad_revisar": false,
+  "max_huecos_permitidos": 30,
+  "adquisicion": {
+    "version": 3,
+    "id_toma": 1,
+    "muestras": 3000,
+    "huecos": 0,
+    "acel_reutilizada": 208,
+    "giro_reutilizado": 226,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4967
+  }
+}

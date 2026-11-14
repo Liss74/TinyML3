@@ -1,0 +1,20 @@
+{
+  "captura_utc": "2026-11-14T00:01:23.114224+00:00",
+  "persona": "P2",
+  "actividad": "correr",
+  "fs_hz": 100,
+  "numero_muestras": 3000,
+  "crc32": "7247EE20",
+  "calidad_revisar": false,
+  "max_huecos_permitidos": 30,
+  "adquisicion": {
+    "version": 3,
+    "id_toma": 1,
+    "muestras": 3000,
+    "huecos": 1,
+    "acel_reutilizada": 147,
+    "giro_reutilizado": 235,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4989
+  }
+}
