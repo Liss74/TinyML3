@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Adquisicion HAR robusta por BLE | Arduino Nano 33 BLE Sense | protocolo v3.
 Incluye contadores de 3 s y 30 s en consola (sin cambiar el firmware).
 
