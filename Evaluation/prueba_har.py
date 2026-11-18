@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
-from bleak import BleakClient, BleakScanner
+from Bleak import BleakClient, BleakScanner
 
 from Bleak import (
     ACTIVIDADES,
