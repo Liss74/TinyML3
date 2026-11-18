@@ -1,0 +1,60 @@
+Reconocimiento de actividad física con TinyML
+
+Plataforma: Arduino Nano 33 BLE Sense
+Descripción
+
+Desarrollar un sistema de reconocimiento de actividad física (Human Activity Recognition, HAR) mediante aprendizaje automático implementado en el Arduino Nano 33 BLE Sense, utilizando las señales del acelerómetro y giróscopo integrados.
+
+El sistema deberá clasificar en tiempo real cinco actividades: reposo, caminar, correr, subir escaleras y bajar escaleras.
+
+Los estudiantes deberán construir su propio conjunto de datos, realizar el preprocesamiento de las señales, entrenar un modelo de aprendizaje automático, cuantizarlo a INT8 e implementar la inferencia directamente en el microcontrolador.
+
+Se evaluará el desempeño considerando precisión de clasificación, tiempo de inferencia y consumo de memoria.
+Cuestionario previo
+
+Responder y justificar brevemente las siguientes preguntas antes de iniciar el desarrollo.
+
+    ¿Qué es una unidad de medición inercial (IMU) y qué magnitudes físicas mide?
+
+    ¿Cuál es la diferencia entre un acelerómetro y un giróscopo?
+
+    ¿Qué información proporciona cada uno de los tres ejes del acelerómetro?
+
+    ¿Por qué es importante mantener una frecuencia de muestreo constante?
+
+    ¿Qué es una ventana temporal y cómo influye su duración en el reconocimiento de actividades?
+
+    ¿Qué ventajas y desventajas tiene utilizar ventanas temporales superpuestas?
+
+    ¿Por qué es necesario normalizar las señales antes de entrenar un modelo?
+
+    ¿Qué problemas pueden presentarse si los datos de entrenamiento provienen de una sola persona?
+
+    ¿En qué consiste la cuantización INT8 y qué ventajas ofrece en un microcontrolador?
+
+    ¿Qué métricas permiten evaluar tanto la calidad de clasificación como la eficiencia computacional de un modelo TinyML?
+
+Entregables
+
+    Dataset: conjunto de datos de las cinco actividades, obtenido de al menos tres personas, incluyendo aceleración y velocidad angular.
+
+    Modelo entrenado: implementación del modelo de clasificación y su versión cuantizada a INT8.
+
+    Implementación en Arduino: adquisición continua de señales y clasificación de actividades en tiempo real, sin procesamiento externo.
+
+    Reporte técnico: descripción del procedimiento y evaluación experimental de:
+
+        Precisión de clasificación y matriz de confusión.
+
+        Acelerómetro frente a acelerómetro + giróscopo.
+
+        Modelo original frente al cuantizado (precisión, memoria y latencia).
+
+    Demostración funcional: reconocimiento de las actividades utilizando el Arduino Nano 33 BLE Sense, mostrando las predicciones en tiempo real.
+    Solo dos archivos. zip  (código, modelo, dataset, videos de evidencia), pdf (reporte)
+
+ 
+
+Tip 1. Utilicen una frecuencia de muestreo constante (por ejemplo, 50 Hz) y ventanas temporales de aproximadamente 2 segundos. Mantengan el Arduino en una posición similar durante todas las grabaciones para reducir variaciones que no correspondan a la actividad.
+
+Tip 2. Eviten mezclar ventanas de una misma sesión de adquisición entre entrenamiento y prueba. Para evaluar la capacidad de generalización, pueden entrenar con los datos de dos personas y probar el modelo con los de una tercera.
