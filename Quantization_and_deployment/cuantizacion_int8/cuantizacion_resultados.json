@@ -1,0 +1,57 @@
+{
+  "modelo": "modelo_fold2.keras",
+  "fold": 2,
+  "tamano_tflite_bytes": 16008,
+  "entrada": {
+    "escala": 0.08950973302125931,
+    "zero_point": 4
+  },
+  "salida": {
+    "escala": 0.00390625,
+    "zero_point": -128
+  },
+  "operadores": [
+    "AVERAGE_POOL_2D",
+    "CONV_2D",
+    "DELEGATE",
+    "EXPAND_DIMS",
+    "FULLY_CONNECTED",
+    "MEAN",
+    "RESHAPE",
+    "SOFTMAX"
+  ],
+  "normalizacion": {
+    "media": [
+      -0.9284578209189269,
+      -0.1326820105293214,
+      0.44160701050141116,
+      -9.526016845694734,
+      1.9205073742741032,
+      3.7036663204361733
+    ],
+    "desviacion": [
+      0.6185501104823266,
+      0.4376141708613951,
+      0.609042451577515,
+      71.84467426076563,
+      140.08385537162326,
+      41.083399910639855
+    ]
+  },
+  "evaluacion": {
+    "val": {
+      "accuracy_float": 0.964,
+      "accuracy_int8": 0.956,
+      "f1_macro_float": 0.9639918742632299,
+      "f1_macro_int8": 0.9559535699068107,
+      "concordancia_float_int8": 0.992
+    },
+    "test": {
+      "accuracy_float": 0.9493333333333334,
+      "accuracy_int8": 0.9493333333333334,
+      "f1_macro_float": 0.9477589636080201,
+      "f1_macro_int8": 0.9477589636080201,
+      "concordancia_float_int8": 1.0
+    }
+  }
+}
