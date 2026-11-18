@@ -7,7 +7,8 @@ Ejemplo:  python Bleak_v3.py --persona P2 --actividad caminar --tomas 1
 Flujo: conectar -> START -> desconectar intencionalmente -> grabar 30 s
 sin depender de BLE -> reconectar -> transferir -> verificar CRC32 -> CSV.
 La grabacion permanece en RAM del Nano tras perder Bluetooth, NO tras reiniciarlo.
-Requiere HAR_Nano_BLE_v3.ino; incompatible con firmware v2.
+La utilidad de adquisicion usa protocolo v3 por defecto. prueba_har.py solicita
+explicitamente v4 para captura e inferencia con la misma logica de reconexion.
 """
 
 import argparse
@@ -31,8 +32,8 @@ UUID_DATOS   = "7a1c0004-5b6e-4c1d-9a3f-3f2b8c9d0001"
 UUID_CRC     = "7a1c0005-5b6e-4c1d-9a3f-3f2b8c9d0001"
 UUID_META    = "7a1c0006-5b6e-4c1d-9a3f-3f2b8c9d0001"
 CMD_START, CMD_SEND, CMD_RESEND, CMD_ABORT = 1, 2, 3, 4
-REPOSO, CUENTA_ATRAS, GRABANDO, LISTO, ENVIANDO = range(5)
-NOMBRES_ESTADO = ("REPOSO", "CUENTA_ATRAS", "GRABANDO", "LISTO", "ENVIANDO")
+REPOSO, CUENTA_ATRAS, GRABANDO, LISTO, ENVIANDO, INFERIENDO = range(6)
+NOMBRES_ESTADO = ("REPOSO", "CUENTA_ATRAS", "GRABANDO", "LISTO", "ENVIANDO", "INFERIENDO")
 
 FS_HZ = 100
 DURACION_S = 30
@@ -70,19 +71,19 @@ class Meta:
     retraso_max_us: int
 
     @classmethod
-    def desde_bytes(cls, datos):
+    def desde_bytes(cls, datos, version=3):
         if len(datos) != META_LONGITUD:
             raise FirmwareIncompatible(
-                f"Metadata de {len(datos)} bytes: se esperaba protocolo v3 ({META_LONGITUD})"
+                f"Metadata de {len(datos)} bytes: se esperaba protocolo v{version} ({META_LONGITUD})"
             )
         meta = cls(*struct.unpack(META_FORMATO, bytes(datos)))
-        if meta.version != 3:
-            raise FirmwareIncompatible(f"Protocolo {meta.version}: se necesita firmware v3")
+        if meta.version != version:
+            raise FirmwareIncompatible(f"Protocolo {meta.version}: se necesita firmware v{version}")
         return meta
 
 
 def nombre_estado(valor):
-    return NOMBRES_ESTADO[valor] if valor is not None and 0 <= valor < 5 else str(valor)
+    return NOMBRES_ESTADO[valor] if valor is not None and 0 <= valor < len(NOMBRES_ESTADO) else str(valor)
 
 
 class Receptor:
@@ -122,11 +123,12 @@ class Receptor:
 
 
 class Sesion:
-    def __init__(self, reconexion_timeout):
+    def __init__(self, reconexion_timeout, version=3):
         self.rx = Receptor()
         self.client = None
         self.reconexion_timeout = reconexion_timeout
         self.cierre_voluntario = False
+        self.version = version
 
     def _desconectado(self, _cliente):
         if not self.cierre_voluntario:
@@ -149,7 +151,7 @@ class Sesion:
             # BlueZ puede conservar "conectado" mientras ya perdió el cache
             # de servicios GATT. Probar una lectura ANTES de reutilizar la sesión.
             try:
-                Meta.desde_bytes(await self.client.read_gatt_char(UUID_META))
+                Meta.desde_bytes(await self.client.read_gatt_char(UUID_META), self.version)
                 return
             except FirmwareIncompatible:
                 raise
@@ -177,11 +179,15 @@ class Sesion:
                     await nuevo.connect()
                     if not nuevo.is_connected:
                         raise ConexionPerdida("Conexión no establecida")
+                    if nuevo.services.get_characteristic(UUID_META) is None:
+                        raise FirmwareIncompatible(
+                            f"Falta META: sube el sketch del protocolo v{self.version} a la placa."
+                        )
                     await nuevo.start_notify(UUID_ESTADO, self.rx.on_estado)
                     await nuevo.start_notify(UUID_DATOS, self.rx.on_datos)
                     # Obliga a descubrir servicios en una sesion GATT NUEVA.
                     datos = await nuevo.read_gatt_char(UUID_META)
-                    Meta.desde_bytes(datos)
+                    Meta.desde_bytes(datos, self.version)
                     self.rx.estado = None
                     self.client = nuevo
                     print("  [BLE] Conectado y servicios GATT descubiertos.")
@@ -219,7 +225,7 @@ class Sesion:
 
     async def meta(self):
         datos = await self._operacion(lambda c: c.read_gatt_char(UUID_META))
-        return Meta.desde_bytes(datos)
+        return Meta.desde_bytes(datos, self.version)
 
     async def crc(self):
         datos = await self._operacion(lambda c: c.read_gatt_char(UUID_CRC))
@@ -254,6 +260,14 @@ async def iniciar_toma(sesion):
     # El Arduino controla la cuenta atrás real de forma independiente.
     instante_orden = None
 
+    def confirmar(meta):
+        if meta.id_toma == meta_anterior.id_toma:
+            return False
+        esperado = (meta_anterior.id_toma + 1) & 0xFFFFFFFF
+        if meta.id_toma != esperado:
+            raise RuntimeError("La placa reinicio o cambio de toma durante START; no se repetira la orden.")
+        return True
+
     for intento in range(3):
         try:
             # Puede existir una ventana de tiempo entre la respuesta BLE y
@@ -261,21 +275,21 @@ async def iniciar_toma(sesion):
             if intento > 0:
                 await sesion.conectar()
             actual = await sesion.meta()
-            if actual.id_toma != meta_anterior.id_toma:
+            if confirmar(actual):
                 return actual.id_toma, (instante_orden or time.monotonic())
             instante_orden = time.monotonic()
             await sesion.comando(CMD_START)
             for _ in range(20):
                 await asyncio.sleep(0.15)
                 actual = await sesion.meta()
-                if actual.id_toma != meta_anterior.id_toma:
+                if confirmar(actual):
                     return actual.id_toma, instante_orden
         except ConexionPerdida:
             print("  [BLE] Se interrumpió START; verificando si la placa ya comenzó...")
             await sesion.cerrar()
             await sesion.conectar()
             actual = await sesion.meta()
-            if actual.id_toma != meta_anterior.id_toma:
+            if confirmar(actual):
                 return actual.id_toma, (instante_orden or time.monotonic())
     raise RuntimeError("El Arduino no confirmó START. La toma no se considerará iniciada.")
 

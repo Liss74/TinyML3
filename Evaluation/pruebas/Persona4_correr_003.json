@@ -1,0 +1,278 @@
+{
+  "fecha": "2026-11-18T09:47:22",
+  "persona": "Persona4",
+  "actividad_real": "correr",
+  "accuracy_prueba": 0.72,
+  "conteo_predicciones": {
+    "correr": 18,
+    "subir_escaleras": 7
+  },
+  "adquisicion": {
+    "version": 4,
+    "id_toma": 10,
+    "muestras": 3000,
+    "huecos": 0,
+    "acel_reutilizada": 76,
+    "giro_reutilizado": 134,
+    "duracion_ms": 30000,
+    "retraso_max_us": 4817
+  },
+  "crc32_resultados": "165C0CA5",
+  "n_ventanas": 25,
+  "inferencia_media_us": 111438,
+  "inferencia_max_us": 116061,
+  "arena_usada_bytes": 9252,
+  "ventanas": [
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.99609375,
+        0.0,
+        0.00390625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.99609375,
+        0.0,
+        0.00390625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.953125,
+        0.01171875,
+        0.03515625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.80078125,
+        0.046875,
+        0.15234375
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0078125,
+        0.9765625,
+        0.01171875
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0,
+        0.99609375,
+        0.0
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0,
+        0.97265625,
+        0.0234375
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.80859375,
+        0.01171875,
+        0.1796875
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.9921875,
+        0.0,
+        0.0078125
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.98828125,
+        0.0,
+        0.0078125
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.9921875,
+        0.0,
+        0.00390625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.94921875,
+        0.0234375,
+        0.0234375
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0,
+        0.99609375,
+        0.0
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0,
+        0.99609375,
+        0.0
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.98046875,
+        0.00390625,
+        0.015625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.984375,
+        0.0,
+        0.015625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.9921875,
+        0.0,
+        0.0078125
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.98828125,
+        0.0,
+        0.01171875
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0078125,
+        0.97265625,
+        0.01953125
+      ]
+    },
+    {
+      "clase": 3,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.0,
+        0.99609375,
+        0.0
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.65234375,
+        0.14453125,
+        0.203125
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.9921875,
+        0.0,
+        0.0078125
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.99609375,
+        0.00390625,
+        0.00390625
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.98046875,
+        0.00390625,
+        0.01171875
+      ]
+    },
+    {
+      "clase": 2,
+      "probabilidades": [
+        0.0,
+        0.0,
+        0.65234375,
+        0.14453125,
+        0.203125
+      ]
+    }
+  ],
+  "crc32_crudos": "A3FBACC4"
+}
